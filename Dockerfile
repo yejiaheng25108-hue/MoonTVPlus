@@ -4,6 +4,9 @@ FROM node:24-alpine AS deps
 # 启用 corepack 并激活 pnpm（Node20 默认提供 corepack）
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# 编译原生依赖（如 better-sqlite3）所需的工具链
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 # 仅复制依赖清单，提高构建缓存利用率
@@ -15,6 +18,9 @@ RUN pnpm install --frozen-lockfile
 # ---- 第 2 阶段：构建项目 ----
 FROM node:24-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# 编译原生依赖（如 better-sqlite3）所需的工具链
+RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 # 复制依赖
